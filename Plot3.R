@@ -19,7 +19,7 @@ plot3 <- function() {
         plot <- ggplot(data=totalBaltimoreEmissionsByYear, aes(year, totalEmissions))
         plot <- plot + geom_point(aes(color=type), size=4)
         plot <- plot + geom_smooth(aes(color=type), method = "lm", se=FALSE)
-        plot <- plot + labs(title="Emission Trends for Polution Source Types", x="Year", y="Total Emissions (tons)")
+        plot <- plot + labs(title="Emission Trends for Polution Source Types in Baltimore", x="Year", y="Total Emissions (tons)")
         print(plot)
         dev.off()
 }

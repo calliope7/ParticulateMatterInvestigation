@@ -8,12 +8,7 @@ NEI <- readRDS("summarySCC_PM25.rds")
 SCC <- readRDS("Source_Classification_Code.rds")
 
 #Question 4: Across the United States, how have emissions from coal combustion-related sources changed from 1999–2008?
-plot4 <- function() {
-        #hard to filter because some coal combustion takes place during use as transport or other processes..
-        # the following match on the short name proves my point
-        # matches <- sapply(levels(SCC[1, "Short.Name"]), function(x) {grepl("[Cc]oal", x)})
-        # levels(SCC[1, "Short.Name"])[matches]
-        
+plot4 <- function() {        
         # If we use the short name to find all observations with 'Coal' noted.. then we have the following set of Level.One classifiers:
         # External Combustion Boilers, Internal Combustion Engines, Stationary Source Fuel Combustion,
         # Mobile Sources, Industrial Processes, Storage and Transport, Miscellaneous Area Sources, Industrial Processes,
@@ -22,28 +17,26 @@ plot4 <- function() {
         # We found these with the following code-
         # measurements with 'Coal' in their short name:
         matches <- sapply(SCC[, "Short.Name"], function(x) {grepl("[^r][Cc]oal|^[Cc]oal", x)})
-        #SCC[matches, c("SCC", "SCC.Level.One")]
-        #
+
         # From these we can look closer to filter out non-combustion processes:
         # "Waste Disposal" shows only 'Open Burning' as a Level.Two having to do with coal combustion
-        # subMatches1 <- sapply(SCC[matches,], function(x) {grepl("SCC.Level.One" == "Waste Disposal" && "SCC.Level.Two" == "Open Burning", x)})
         matchedWasteDisposal <- sapply(SCC[matches, "SCC.Level.One"], function(x) {x=="Waste Disposal"})
         matchedWasteDisposal2 <- sapply(SCC[matches,][matchedWasteDisposal, "SCC.Level.Three"], function(x) {grepl("Open Burning", x)})
         wastDispIDs <- as.character(SCC[matches,][matchedWasteDisposal,][matchedWasteDisposal2,"SCC"])
         
-        # these should be included because it's coal combustion that moves the ships
+        # Mobile Sources where Coal it the fuel should be included (its a combustion process)
         matchedMob = sapply(SCC[matches, "SCC.Level.One"], function(x) {x=="Mobile Sources"})
         mobIDs <- as.character(SCC[matches,][matchedMob,"SCC"])
         
-        # we Don't want these (Storage) because they are only about storage and transport Of coal
+        # we Don't want Storage related because they are only about storage and transport Of coal not burning it
         #matchedStorage = sapply(SCC[matches, "SCC.Level.One"], function(x) {x=="Storage and Transport"})
         #SCC[matches,][matchedStorage,]
         
-        # this burned gasified Coal so it is about coal combustion
+        # this Internal Combustion Engine burned gasified Coal so it is about coal combustion
         matchedIntCombEng = sapply(SCC[matches, "SCC.Level.One"], function(x) {x=="Internal Combustion Engines"})
         intCombEngIDs <- as.character(SCC[matches,][matchedIntCombEng,"SCC"])
         
-        #Industrial Processes - some use coal - this is hard to sort but In-process Fuel Use of coal is a hit
+        #Industrial Processes - some use coal - this is hard to sort but In-process Fuel Use of coal is a certanly hit
         matchedIndust = sapply(SCC[matches, "SCC.Level.One"], function(x) {x=="Industrial Processes"})
         matchedIndust2 <- sapply(SCC[matches,][matchedIndust, "SCC.Level.Two"], function(x) {x == "In-process Fuel Use"})
         industIDs <- as.character(SCC[matches,][matchedIndust,][matchedIndust2,"SCC"])
